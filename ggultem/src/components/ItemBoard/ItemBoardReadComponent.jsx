@@ -99,6 +99,11 @@ const ItemBoardReadComponent = () => {
             <h2 className="info-price">{item.price?.toLocaleString()}원</h2>
           </div>
 
+          <div className="detail-row">
+            <span className="label">조회수</span>
+            <span className="value">{item.viewCount || 0}</span>
+          </div>
+
           <div className="info-details">
             <div className="detail-row">
               <span className="label">판매자</span>
