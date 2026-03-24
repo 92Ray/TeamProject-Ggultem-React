@@ -9,66 +9,78 @@ const ItemBoardList = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // URL 파라미터에서 필터 값 추출
   const page = parseInt(searchParams.get("page")) || 1;
   const size = parseInt(searchParams.get("size")) || 10;
-  const keyword = searchParams.get("keyword") || "";
+
+  // ✅ 필터
+  const status = searchParams.get("status") || "all";
+  const category = searchParams.get("category") || "all";
+  const location = searchParams.get("location") || "all";
+
+  // ✅ 검색
   const searchType = searchParams.get("searchType") || "all";
+  const keyword = searchParams.get("keyword") || "";
 
-  // ✅ 추가된 필터 파라미터
-  const statusFilter = searchParams.get("status") || "all"; // all, false, true
-  const categoryFilter = searchParams.get("category") || "all";
-  const locationFilter = searchParams.get("location") || "all";
+  const [serverData, setServerData] = useState({
+    dtoList: [],
+    totalCount: 0,
+  });
 
-  const [serverData, setServerData] = useState({ dtoList: [], totalCount: 0 });
   const [searchState, setSearchState] = useState({
     type: searchType,
     word: keyword,
   });
 
-  // ✅ 필터 변경 시 호출되는 함수
-  const handleFilterChange = (name, value) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("page", "1"); // 필터 변경 시 1페이지로 이동
-    params.set(name, value);
-    navigate(`/itemBoard/list?${params.toString()}`);
-  };
-
+  // ✅ 데이터 호출 (검색 + 필터 같이 전달)
   useEffect(() => {
-    // API 호출 시 필터 파라미터도 함께 전달 (백엔드에서 처리 필요)
     getList({
       page,
       size,
-      keyword,
       searchType,
-      status: statusFilter,
-      category: categoryFilter,
-      location: locationFilter,
+      keyword,
+      status,
+      category,
+      location,
     })
       .then((data) => {
         if (data) setServerData(data);
       })
       .catch((err) => console.error("데이터 로드 실패:", err));
-  }, [
-    page,
-    size,
-    keyword,
-    searchType,
-    statusFilter,
-    categoryFilter,
-    locationFilter,
-  ]);
+  }, [page, size, searchType, keyword, status, category, location]);
 
-  const handleChangeSearch = (e) => {
-    setSearchState({ ...searchState, [e.target.name]: e.target.value });
+  // ✅ 필터 변경
+  const handleFilterChange = (type, value) => {
+    const params = new URLSearchParams(searchParams);
+
+    params.set("page", "1");
+
+    if (value === "all") {
+      params.delete(type);
+    } else {
+      params.set(type, value);
+    }
+
+    navigate(`/itemBoard/list?${params.toString()}`);
   };
 
+  // ✅ 검색 input 변경
+  const handleChangeSearch = (e) => {
+    setSearchState({
+      ...searchState,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // ✅ 검색 실행
   const handleSearch = (e) => {
     if (e) e.preventDefault();
+
     const params = new URLSearchParams(searchParams);
+
     params.set("page", "1");
     params.set("searchType", searchState.type);
     params.set("keyword", searchState.word.trim());
+
     navigate(`/itemBoard/list?${params.toString()}`);
   };
 
@@ -84,8 +96,8 @@ const ItemBoardList = () => {
         </button>
       </div>
 
-      {/* 검색 섹션 */}
       <div className="hero-section">
+        {/* ✅ 검색 */}
         <form className="search-form-wide" onSubmit={handleSearch}>
           <select
             name="type"
@@ -97,6 +109,7 @@ const ItemBoardList = () => {
             <option value="title">상품명</option>
             <option value="content">내용</option>
           </select>
+
           <input
             type="text"
             name="word"
@@ -105,28 +118,29 @@ const ItemBoardList = () => {
             value={searchState.word}
             onChange={handleChangeSearch}
           />
+
           <button type="submit" className="search-btn-wide">
             검색
           </button>
         </form>
 
-        {/* ✅ 추가된 필터 바 섹션 */}
+        {/* ✅ 필터 */}
         <div className="filter-bar">
-          {/* 판매 상태 필터 */}
+          {/* 🔥 상태 (수정됨) */}
           <select
             className="filter-select"
-            value={statusFilter}
+            value={status}
             onChange={(e) => handleFilterChange("status", e.target.value)}
           >
             <option value="all">전체 상태</option>
-            <option value="false">판매 중</option>
-            <option value="true">판매 완료</option>
+            <option value="false">판매중</option>
+            <option value="true">판매완료</option>
           </select>
 
-          {/* 카테고리 필터 */}
+          {/* 카테고리 */}
           <select
             className="filter-select"
-            value={categoryFilter}
+            value={category}
             onChange={(e) => handleFilterChange("category", e.target.value)}
           >
             <option value="all">모든 카테고리</option>
@@ -137,16 +151,15 @@ const ItemBoardList = () => {
             <option value="furniture">가구</option>
           </select>
 
-          {/* 지역 필터 (자주 올라오는 지역 예시) */}
+          {/* 지역 */}
           <select
             className="filter-select"
-            value={locationFilter}
+            value={location}
             onChange={(e) => handleFilterChange("location", e.target.value)}
           >
             <option value="all">전체 지역</option>
             <option value="서울">서울</option>
             <option value="경기">경기</option>
-            <option value="인천">인천</option>
             <option value="부산">부산</option>
           </select>
 
@@ -159,7 +172,7 @@ const ItemBoardList = () => {
         </div>
       </div>
 
-      {/* 상품 그리드 (기존과 동일) */}
+      {/* ✅ 리스트 */}
       <div className="item-grid">
         {serverData.dtoList?.length > 0 ? (
           serverData.dtoList.map((item) => (
@@ -173,11 +186,13 @@ const ItemBoardList = () => {
               }
             >
               <div className="item-image">
-                {String(item.status) === "true" && (
+                {/* 🔥 상태 표시 수정 */}
+                {item.status === "true" && (
                   <div className="sold-out-overlay">
                     <span>SOLD OUT</span>
                   </div>
                 )}
+
                 <img
                   src={
                     item.uploadFileNames?.length > 0
@@ -185,9 +200,10 @@ const ItemBoardList = () => {
                       : `${host}/itemBoard/view/default.jpg`
                   }
                   alt={item.title}
-                  className={String(item.status) === "true" ? "img-dark" : ""}
+                  className={item.status === "true" ? "img-dark" : ""}
                 />
               </div>
+
               <div className="item-info">
                 <div className="item-category">{item.category}</div>
                 <div className="item-title">{item.title}</div>
