@@ -2,6 +2,7 @@ import { useNavigate, useSearchParams } from "react-router";
 import { getList, deleteOne, API_SERVER_HOST } from "../../api/CartApi";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import PageComponent from "../common/PageComponent";
 import "./CartListComponent.css"; // CSS 파일 임포트
 
 const host = API_SERVER_HOST;
@@ -18,9 +19,26 @@ const CartList = () => {
   const searchType = searchParams.get("searchType") || "all";
   const keyword = searchParams.get("keyword") || "";
 
+  const [searchState, setSearchState] = useState({
+    type: searchType,
+    word: keyword,
+  });
+
+  const moveToList = (pageParam) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", pageParam.page);
+    params.set("searchType", searchType);
+    params.set("keyword", keyword);
+
+    navigate(`/cart/list?${params.toString()}`);
+  };
+
   const [serverData, setServerData] = useState({
     dtoList: [],
     totalCount: 0,
+    pageNumList: [],
+    prev: false,
+    next: false,
   });
 
   const fetchCartList = () => {
@@ -96,6 +114,26 @@ const CartList = () => {
     }
   };
 
+  // ✅ 검색 input 변경
+  const handleChangeSearch = (e) => {
+    setSearchState({
+      ...searchState,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // ✅ 검색 실행
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+
+    const params = new URLSearchParams(searchParams);
+
+    params.set("page", "1");
+    params.set("searchType", searchState.type);
+    params.set("keyword", searchState.word.trim());
+
+    navigate(`/cart/list?${params.toString()}`);
+  };
   return (
     <div className="cart-container">
       <div className="cart-header">
@@ -103,6 +141,35 @@ const CartList = () => {
         <p className="cart-count">
           총 <strong>{serverData.totalCount}</strong>개
         </p>
+      </div>
+
+      {/* ✅ 검색 영역 추가 */}
+      <div className="cart-search-bar">
+        <form onSubmit={handleSearch}>
+          <select
+            name="type"
+            value={searchState.type}
+            onChange={handleChangeSearch}
+            className="search-select"
+          >
+            <option value="all">전체</option>
+            <option value="title">제목</option>
+            <option value="location">지역</option>
+          </select>
+
+          <input
+            type="text"
+            name="word"
+            value={searchState.word}
+            onChange={handleChangeSearch}
+            placeholder="검색어를 입력하세요"
+            className="search-input"
+          />
+
+          <button type="submit" className="search-btn">
+            검색
+          </button>
+        </form>
       </div>
 
       <div className="cart-controls">
@@ -172,6 +239,7 @@ const CartList = () => {
             </button>
           </div>
         )}
+        <PageComponent serverData={serverData} moveToList={moveToList} />
       </div>
     </div>
   );
