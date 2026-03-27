@@ -2,11 +2,18 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { getList } from "../../../api/admin/ItemBoardApi";
 import PageComponent from "../../common/PageComponent";
+import axios from "axios";
+import { getListByGroup } from "../../../api/admin/CodeDetailApi";
+import { API_SERVER_HOST } from "../../../api/ItemBoardApi";
 import "./AdminListComponent.css";
+
+const host = API_SERVER_HOST;
 
 const AdminListComponent = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [categories, setCategories] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [serverData, setServerData] = useState({
     dtoList: [],
     totalCount: 0,
@@ -15,118 +22,118 @@ const AdminListComponent = () => {
     next: false,
   });
 
-  // URL에서 검색 타입과 키워드 가져오기
   const searchType = searchParams.get("searchType") || "all";
   const keyword = searchParams.get("keyword") || "";
   const page = parseInt(searchParams.get("page")) || 1;
   const size = parseInt(searchParams.get("size")) || 10;
   const enabled = searchParams.get("enabled") || "all";
 
-  // [중요] 페이지 이동 시 경로 수정 (admin 필수)
+  const handleSearch = () => {
+    const type = document.getElementById("itemSearchType").value;
+    const inputElement = document.getElementById("itemSearchKeyword");
+    const word = inputElement.value.trim();
+    navigate(
+      `/admin/itemBoard/list?page=1&searchType=${type}&keyword=${encodeURIComponent(word)}`,
+    );
+    inputElement.value = "";
+  };
+
+  const getCodeName = (codeList, codeValue) => {
+    if (!codeList || codeList.length === 0) return codeValue;
+    const found = codeList.find(
+      (c) => String(c.codeValue) === String(codeValue),
+    );
+    return found ? found.codeName : codeValue;
+  };
+
   const moveToList = (pageParam) => {
     const params = new URLSearchParams();
     params.set("page", pageParam.page);
     params.set("searchType", searchType);
     params.set("keyword", keyword);
-
-    if (enabled !== "all" && enabled !== null) {
-      params.set("enabled", enabled);
-    }
-
-    // /admin/itemBoard/list로 가야 관리자 페이지가 유지됩니다.
+    if (enabled !== "all") params.set("enabled", enabled);
     navigate(`/admin/itemBoard/list?${params.toString()}`);
   };
 
   useEffect(() => {
-    // 1. 가공할 객체를 따로 생성
-    const params = {
-      page,
-      size,
-      searchType,
-      keyword,
-    };
-
-    // 2. 'all'이 아닐 때만 숫자로 바꿔서 params에 추가
-    if (enabled !== "all" && enabled !== null && enabled !== undefined) {
-      params.enabled = Number(enabled);
-    }
+    const params = { page, size, searchType: searchType || "all" };
+    if (keyword && keyword.trim() !== "") params.keyword = keyword;
+    if (enabled !== "all" && enabled !== null) params.enabled = Number(enabled);
 
     getList(params).then((data) => setServerData(data));
+
+    const pageParam = { page: 1, size: 100 };
+    axios
+      .get(`${host}/api/codegroup/list`, { params: pageParam })
+      .then((res) => {
+        const allGroups = res.data.dtoList || [];
+        allGroups.forEach((group) => {
+          const gCode = group.groupCode.toUpperCase();
+          if (gCode.includes("ITEM_CATEGORY")) {
+            getListByGroup(pageParam, group.groupCode).then((data) =>
+              setCategories(data.dtoList),
+            );
+          }
+        });
+      });
   }, [page, size, enabled, searchType, keyword]);
+
   return (
-    <div className="admin-main-wrapper">
-      <div className="admin-content-box">
-        <div className="admin-header">
-          <h3 className="admin-title">
+    <div className="item-main-wrapper">
+      <div className="item-content-box">
+        <div className="item-header">
+          <h3 className="item-title">
             상품 관리 <span className="yellow-point">마스터</span>
           </h3>
 
-          {/* 검색 영역 추가 */}
-          <div className="admin-search-bar">
-            <select id="searchType" defaultValue={searchType}>
+          <div className="item-search-bar">
+            <select id="itemSearchType" defaultValue={searchType}>
               <option value="all">전체</option>
               <option value="title">상품명</option>
               <option value="writer">판매자</option>
             </select>
             <input
               type="text"
-              id="searchKeyword"
-              defaultValue={keyword}
+              id="itemSearchKeyword"
               placeholder="검색어를 입력하세요"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  const type = document.getElementById("searchType").value;
-                  const word = document.getElementById("searchKeyword").value;
-                  navigate(
-                    `/admin/itemBoard/list?page=1&searchType=${type}&keyword=${word}`,
-                  );
-                }
-              }}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
-            <button
-              className="search-btn"
-              onClick={() => {
-                const type = document.getElementById("searchType").value;
-                const word = document.getElementById("searchKeyword").value;
-                navigate(
-                  `/admin/itemBoard/list?page=1&searchType=${type}&keyword=${word}`,
-                );
-              }}
-            >
+            <button className="item-search-btn" onClick={handleSearch}>
               검색
             </button>
           </div>
 
-          <select
-            id="searchEnabled"
-            className="admin-status-select"
-            value={enabled}
-            onChange={(e) => {
-              const enabled = e.target.value;
-              // 상태 변경 시 바로 해당 조건으로 이동
-              navigate(`/admin/itemBoard/list?page=1&enabled=${enabled}`);
-            }}
-          >
-            <option value="all">판매상태(전체)</option>
-            <option value="1">판매중</option>
-            <option value="2">판매완료</option>
-            <option value="0">삭제</option>
-          </select>
-          <button
-            className="yellow-btn"
-            onClick={() => navigate("/admin/itemBoard/register")}
-          >
-            신규 상품 등록
-          </button>
-          <button
-            className="yellow-btn"
-            onClick={() => navigate("/admin/itemBoard/reply")}
-          >
-            댓글 관리
-          </button>
+          <div className="item-header-right">
+            <select
+              className="item-status-select"
+              value={enabled}
+              onChange={(e) =>
+                navigate(
+                  `/admin/itemBoard/list?page=1&enabled=${e.target.value}`,
+                )
+              }
+            >
+              <option value="all">판매상태(전체)</option>
+              <option value="1">판매중</option>
+              <option value="2">판매완료</option>
+              <option value="0">삭제</option>
+            </select>
+            <button
+              className="item-yellow-btn"
+              onClick={() => navigate("/admin/itemBoard/register")}
+            >
+              신규 상품 등록
+            </button>
+            <button
+              className="item-yellow-btn"
+              onClick={() => navigate("/admin/itemBoard/reply")}
+            >
+              댓글 관리
+            </button>
+          </div>
         </div>
 
-        <table className="admin-table">
+        <table className="item-table">
           <thead>
             <tr>
               <th>번호</th>
@@ -146,29 +153,30 @@ const AdminListComponent = () => {
               >
                 <td>{item.id}</td>
                 <td>
-                  <span className="cat-badge">{item.category}</span>
+                  <span className="item-cat-badge">
+                    {getCodeName(categories, item.category)}
+                  </span>
                 </td>
-                <td className="text-left">
+                <td className="item-text-left">
                   <strong>{item.title}</strong>
                 </td>
                 <td>{item.nickname || item.writer}</td>
-                <td className="price-bold">{item.price?.toLocaleString()}원</td>
+                <td className="item-price-bold">
+                  {item.price?.toLocaleString()}원
+                </td>
                 <td>{new Date(item.regDate).toLocaleDateString()}</td>
                 <td>
-                  <div className="status-container">
-                    {item.enabled === 1 && (
-                      <span className="status-badge active">
-                        <span className="dot"></span> 판매중
+                  <div className="item-status-container">
+                    {item.enabled === 0 ? (
+                      <span className="item-status-badge deleted">
+                        <span className="item-dot"></span> 삭제됨
                       </span>
-                    )}
-                    {item.enabled === 2 && (
-                      <span className="status-badge sold-out">
-                        <span className="dot"></span> 판매완료
-                      </span>
-                    )}
-                    {item.enabled === 0 && (
-                      <span className="status-badge deleted">
-                        <span className="dot"></span> 삭제됨
+                    ) : (
+                      <span
+                        className={`item-status-badge ${item.enabled === 2 ? "sold-out" : "active"}`}
+                      >
+                        <span className="item-dot"></span>{" "}
+                        {item.enabled === 2 ? "판매완료" : "판매중"}
                       </span>
                     )}
                   </div>
@@ -178,7 +186,7 @@ const AdminListComponent = () => {
           </tbody>
         </table>
 
-        <div className="admin-paging">
+        <div className="item-paging">
           <PageComponent serverData={serverData} moveToList={moveToList} />
         </div>
       </div>
