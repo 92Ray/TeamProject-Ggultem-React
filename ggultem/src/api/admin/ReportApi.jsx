@@ -33,32 +33,7 @@ export const completeReportProcess = async (processedDTO) => {
   return res.data;
 };
 
-/**
- * 5. 사용자: 신고 접수 (추가)
- */
-// 회원 신고 등록용
-export const postReport = async (reportData) => {
-  const header = { headers: { "Content-Type": "multipart/form-data" } };
-  const formData = new FormData();
-
-  formData.append("memberEmail", reportData.memberEmail);
-  formData.append("targetMemberId", reportData.targetMemberId); // ← 추가
-  formData.append("reportType", reportData.reportType);
-  formData.append("reason", reportData.reason);
-  formData.append("targetType", reportData.targetType);
-  formData.append("targetNo", reportData.targetNo);
-
-  if (reportData.files && reportData.files.length > 0) {
-    for (let i = 0; i < reportData.files.length; i++) {
-      formData.append("files", reportData.files[i]);
-    }
-  }
-
-  // ✅ 회원용 URL
-  const res = await axios.post(
-    `${API_SERVER_HOST}/api/report/`,
-    formData,
-    header,
-  );
+export const getReportProcess = async (reportId) => {
+  const res = await axios.get(`${host}/processed/${reportId}`);
   return res.data;
 };
