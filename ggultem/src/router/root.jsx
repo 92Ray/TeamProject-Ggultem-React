@@ -79,6 +79,8 @@ const BannerModify = lazy(() => import("../pages/admin/Banner/ModifyPage"));
 const Main = lazy(() => import("../pages/MainPage"));
 const Login = lazy(() => import("../pages/LoginPage"));
 const SignUp = lazy(() => import("../pages/Member/RegisterPage"));
+const FindEmail = lazy(() => import("../pages/Member/FindEmailPage"));
+const ResetPw = lazy(() => import("../pages/Member/ResetPwPage"));
 const KakaoRedirect = lazy(() => import("../pages/KakaoRedirectPage"));
 const GoogleRedirect = lazy(() => import("../pages/GoogleRedirectPage"));
 //chat ========================================================
@@ -483,6 +485,22 @@ const root = createBrowserRouter([
     element: (
       <Suspense fallback={<Loading />}>
         <SignUp />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/member/findemail",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <FindEmail />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/member/resetPw/:email",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ResetPw />
       </Suspense>
     ),
   },
