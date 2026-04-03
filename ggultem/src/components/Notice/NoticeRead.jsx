@@ -4,18 +4,11 @@ import { getOne } from "../../api/NoticeApi";
 import { API_SERVER_HOST } from "../../api/config";
 import useCustomMove from "../../hooks/useCustomMove";
 import "./NoticeRead.css"; // CSS 파일 연결 확인!
-import useReport from "../../hooks/useReport";
-import ReportModal from "../../common/ReportModal";
-import Header from "../../include/Header";
-import Footer from "../../include/Footer";
 
 const NoticeRead = ({ noticeId }) => {
   const { moveToNoticeList } = useCustomMove();
   const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  //
-  const { showModal, setShowModal, sendReport } = useReport();
 
   useEffect(() => {
     getOne(noticeId)
@@ -32,14 +25,6 @@ const NoticeRead = ({ noticeId }) => {
   if (loading) return <div className="loading-container">로딩 중...</div>;
   if (!notice)
     return <div className="error-container">데이터를 찾을 수 없습니다.</div>;
-
-  //
-  // notice 데이터 로드 후 세팅
-  const targetData = {
-    targetType: "NOTICE",
-    targetNo: noticeId,
-    targetMemberId: notice.memberEmail, // 작성자 이메일로 비교
-  };
 
   return (
     <div className="notice-read-wrapper">
@@ -91,18 +76,7 @@ const NoticeRead = ({ noticeId }) => {
           <button className="btn-back" onClick={() => moveToNoticeList()}>
             목록으로 돌아가기
           </button>
-          {/* 신고 버튼 등장! */}
-          <button onClick={() => setShowModal(true)} className="btn-report">
-            신고하기(테스트)
-          </button>
         </div>
-
-        <ReportModal
-          show={showModal}
-          targetData={targetData}
-          callbackFn={() => setShowModal(false)}
-          submitFn={sendReport}
-        />
       </div>
     </div>
   );
