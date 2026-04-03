@@ -89,3 +89,11 @@ export const verifyEmailCode = async (email, code) => {
   const res = await axios.post(`${host}/api/mail/verify`, formData);
   return res.data;
 };
+
+export const resetPassword = async (email, newPw) => {
+  const formData = new FormData();
+  formData.append("email", email);
+  formData.append("pw", newPw);
+  const res = await axios.put(`${host}/admin/member/resetPw`, formData);
+  return res.data;
+};

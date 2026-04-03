@@ -101,9 +101,23 @@ const LoginComponent = () => {
           <button className="login-btn" onClick={handleClickLogin}>
             꿀템 로그인
           </button>
-          <Link to={"/member/register"} className="sign_up_btn">
-            꿀템 회원가입
-          </Link>
+          <div className="sub-btn-group">
+            <button
+              type="button"
+              onClick={() => navigate("/member/register")}
+              className="sub-btn"
+            >
+              회원가입
+            </button>
+            <span className="divider">|</span>
+            <button
+              type="button"
+              onClick={() => navigate("/member/findemail")}
+              className="sub-btn"
+            >
+              이메일 찾기
+            </button>
+          </div>
         </form>
 
         <div className="social-login-container">

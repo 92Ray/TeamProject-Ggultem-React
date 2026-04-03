@@ -227,3 +227,76 @@
   margin-right: 2px;
   box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
 }
+
+.reset-pw-box {
+  max-width: 500px;
+}
+
+.reset-workflow {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  text-align: left;
+}
+
+.step-section {
+  padding: 20px;
+  border-radius: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  transition: all 0.3s ease;
+}
+
+.step-section.active {
+  background-color: #fff;
+  border-color: #ffd900;
+  box-shadow: 0 5px 15px rgba(255, 217, 0, 0.1);
+}
+
+.step-section.completed {
+  opacity: 0.6;
+  background-color: #e8f5e9;
+  border-color: #a5d6a7;
+}
+
+.input-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+/* 인풋 옆에 버튼이 붙는 스타일 */
+.input-with-btn {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.input-with-btn input {
+  flex: 1;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.inline-btn {
+  padding: 0 15px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* 등장 애니메이션 */
+.animation-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
