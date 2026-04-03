@@ -20,29 +20,29 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  
-  background-color: #FFFCEB; /* 연한 꿀색 배경 */
-  border: 1px solid #FFD700; /* 꿀템 시그니처 테두리 */
-  color: #3F2E1B; /* 벌꿀 갈색 텍스트 */
+
+  background-color: #fffceb; /* 연한 꿀색 배경 */
+  border: 1px solid #ffd700; /* 꿀템 시그니처 테두리 */
+  color: #3f2e1b; /* 벌꿀 갈색 텍스트 */
   margin-top: 10px;
   font-size: 15px; /* 시인성 확보 */
   font-weight: 700;
   cursor: pointer;
   padding: 8px 16px;
   border-radius: 12px; /* 둥글둥글하고 귀여운 곡선 */
-  
+
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 쫀득한 움직임 */
 }
 
 .back-btn:hover {
-  background-color: #FFD700; /* 호버 시 전체가 황금빛으로! */
-  color: #3F2E1B;
+  background-color: #ffd700; /* 호버 시 전체가 황금빛으로! */
+  color: #3f2e1b;
   transform: translateY(-2px); /* 살짝 떠오르는 느낌 */
 }
 
 .back-btn:active {
   transform: translateY(2px); /* 눌렀을 때 쫀득하게 눌림 */
-  box-shadow: 0 1px 0px #FFD700;
+  box-shadow: 0 1px 0px #ffd700;
 }
 
 .read-header h2 {
@@ -100,25 +100,31 @@
 
 /* 공유 버튼 스타일 */
 .share-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* ✅ 버튼 사이의 간격을 조절 (원하는 만큼 숫자를 바꾸세요) */
   position: relative;
 }
-
 .main-share-btn {
-  padding: 6px 12px; /* 글자 주변 여백 */
-  background-color: #ffffff; /* 흰색 배경 */
-  border: 1px solid #e9ecef; /* 아주 연한 테두리 */
-  border-radius: 6px; /* 살짝 둥근 모서리 */
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 8px 15px;
+  background-color: #f8f9fa; /* 연한 회색 배경 */
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 /* 호버 시 효과 */
 .main-share-btn:hover {
-  background-color: #f8f9fa;
-  border-color: #dee2e6;
+  background-color: #e9ecef;
+}
+
+.btn-report-style {
+  color: #dc3545; /* 빨간색 텍스트 */
+  border-color: #dc3545;
 }
 
 /* 버튼 내부 텍스트 스타일 */
@@ -278,7 +284,7 @@
 .chat-btn:nth-child(1):hover {
   background: #1b1c1d;
   color: #fff;
-   transform: color;
+  transform: color;
 }
 .chat-btn:nth-child(2):hover {
   background: #ba890f;

@@ -5,6 +5,8 @@ import {
   modifyReply,
   removeReply,
 } from "../../api/ItemBoardReplyApi";
+import useReport from "../../hooks/useReport";
+import ReportModal from "../../common/ReportModal";
 import { useSelector } from "react-redux";
 import "./ItemBoardReplyComponent.css";
 
@@ -16,6 +18,7 @@ const ItemBoardReplyComponent = ({ itemId }) => {
   const [modifyReplyNo, setModifyReplyNo] = useState(null);
   const [modifyContent, setModifyContent] = useState("");
 
+  const { showModal, setShowModal, sendReport } = useReport();
   const loginState = useSelector((state) => state.loginSlice);
   const email = loginState?.email;
 
@@ -90,6 +93,14 @@ const ItemBoardReplyComponent = ({ itemId }) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     removeReply(replyNo).then(() => {
       loadReplies(); // 삭제 후 목록 갱신 필수
+    });
+  };
+  const [targetData, setTargetData] = useState(null);
+  const sendTargetData = (reply) => {
+    setTargetData({
+      targetType: "거래게시판", // Notice인지 reply인지 등
+      targetNo: Number(reply.replyNo), // targetNo에 해당하는 변수명
+      targetMemberId: reply.email, // 작성자 이메일로 비교
     });
   };
 
@@ -168,6 +179,18 @@ const ItemBoardReplyComponent = ({ itemId }) => {
                   {email && (
                     <button onClick={() => setOpenReplyNo(reply.replyNo)}>
                       답글
+                    </button>
+                  )}
+
+                  {email && reply.email !== email && (
+                    <button
+                      onClick={() => {
+                        sendTargetData(reply); // 부모 댓글 객체 전달
+                        setShowModal(true);
+                      }}
+                      className="btn-report"
+                    >
+                      신고하기
                     </button>
                   )}
                   {reply.email === email && (
@@ -255,6 +278,19 @@ const ItemBoardReplyComponent = ({ itemId }) => {
                     </div>
 
                     {/* 대댓글 액션 버튼 */}
+                    <div className="reply-actions">
+                      {email && child.email !== email && (
+                        <button
+                          onClick={() => {
+                            sendTargetData(child);
+                            setShowModal(true);
+                          }}
+                          className="btn-report"
+                        >
+                          신고하기
+                        </button>
+                      )}
+                    </div>
                     {Number(child.enabled) === 1 && child.email === email && (
                       <div className="reply-actions small">
                         <button onClick={() => handleModify(child)}>
@@ -272,6 +308,12 @@ const ItemBoardReplyComponent = ({ itemId }) => {
           </div>
         ))}
       </div>
+      <ReportModal
+        show={showModal}
+        targetData={targetData}
+        callbackFn={() => setShowModal(false)}
+        submitFn={sendReport}
+      />
     </div>
   );
 };
