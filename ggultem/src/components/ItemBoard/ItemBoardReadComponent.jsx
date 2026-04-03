@@ -4,10 +4,12 @@ import { getOne, deleteOne, API_SERVER_HOST } from "../../api/ItemBoardApi";
 import { getListByGroup } from "../../api/admin/CodeDetailApi";
 import useCustomLogin from "../../hooks/useCustomLogin";
 import ItemBoardReplyComponent from "./ItemBoardReplyComponent";
-import "./ItemBoardReadComponent.css";
 import { postAdd } from "../../api/CartApi";
 import { postChatAdd } from "../../api/ChatApi";
+import useReport from "../../hooks/useReport";
+import ReportModal from "../../common/ReportModal";
 import axios from "axios";
+import "./ItemBoardReadComponent.css";
 
 const host = API_SERVER_HOST;
 
@@ -18,9 +20,12 @@ const ItemBoardReadComponent = () => {
   const [item, setItem] = useState(null);
   const [fetching, setFetching] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
+  const [targetData, setTargetData] = useState(null);
 
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
+  const { showModal, setShowModal, sendReport } = useReport();
+  const email = loginState?.email;
 
   // 2. 데이터 및 공통 코드 로드
   useEffect(() => {
@@ -111,6 +116,14 @@ const ItemBoardReadComponent = () => {
 
   const isSoldOut = item.status === "판매완료" || item.status === "true";
 
+  const sendTargetData = (item) => {
+    setTargetData({
+      targetType: "거래게시판", // Notice인지 reply인지 등
+      targetNo: Number(item.itemId), // targetNo에 해당하는 변수명
+      targetMemberId: item.email, // 작성자 이메일로 비교
+    });
+  };
+
   return (
     <div className="read-container">
       <div className="read-header">
@@ -166,6 +179,23 @@ const ItemBoardReadComponent = () => {
                   </button>
                 </div>
               )}
+              {email && item.email !== email && (
+                <button
+                  className="main-share-btn"
+                  onClick={() => {
+                    sendTargetData(item);
+                    setShowModal(true);
+                  }}
+                >
+                  <span className="share-icon">신고하기</span>
+                </button>
+              )}
+              <ReportModal
+                show={showModal}
+                targetData={targetData}
+                callbackFn={() => setShowModal(false)}
+                submitFn={sendReport}
+              />
             </div>
           </div>
 
