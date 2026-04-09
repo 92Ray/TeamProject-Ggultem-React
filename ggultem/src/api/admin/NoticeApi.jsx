@@ -1,5 +1,4 @@
 import axios from "axios";
-
 import { API_SERVER_HOST } from "../config";
 
 const prefix = `${API_SERVER_HOST}/admin/notice`;

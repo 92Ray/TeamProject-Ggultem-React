@@ -1,7 +1,6 @@
 import axios from "axios";
+import { API_SERVER_HOST } from "../config";
 
-//서버 주소
-export const API_SERVER_HOST = "http://localhost:8080";
 
 // 관리자용 댓글 리스트 (주소를 컨트롤러에 맞춰서 정확히 입력)
 export const adminList = async (params) => {

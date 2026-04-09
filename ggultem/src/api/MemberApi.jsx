@@ -1,7 +1,9 @@
 import axios from "axios";
 
+import { API_SERVER_HOST } from "./config";
+
 // 백엔드 서버 주소
-export const API_SERVER_HOST = "http://localhost:8080";
+//export const API_SERVER_HOST = "http://localhost:8080";
 const host = `${API_SERVER_HOST}`;
 
 // REST API 키와 리다이렉트 주소를 상수로 관리
